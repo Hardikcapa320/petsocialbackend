@@ -69,7 +69,6 @@ app.post("/timeline", auth, async(req,res) => {
     console.log(post);
     res.send(post);
 })
-kjfd
 app.get("/category/:id", async(req,res) => {
     const posts = await Post.find({category: req.params['id']});
     console.log(posts);
