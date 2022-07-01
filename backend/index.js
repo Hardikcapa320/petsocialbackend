@@ -65,29 +65,35 @@ app.get("/newpst", async(req,res) => {
 }) 
 
 app.post("/timeline", auth, async(req,res) => {
-    const post = await Post.find({email: req.body.email});
-    console.log(post);
-    res.send(post);
+    const skipping = Number(req.query.skip) || 0;
+    const limiting = Number(req.query.limit) || 2;
+    const post = await Post.find({email: req.body.email}).skip(skipping).limit(limiting);
+    const count = await Post.find().count();
+    res.send({posts: post, count: count});
 })
 app.get("/category/:id", async(req,res) => {
-    const posts = await Post.find({category: req.params['id']});
-    console.log(posts);
-    res.send(posts);
+    const skipping = Number(req.query.skip) || 0;
+    const limiting = Number(req.query.limit) || 2;
+    const posts = await Post.find({category: req.params['id']}).skip(skipping).limit(limiting);
+    const count = await Post.find({category: req.params['id']}).count();
+    res.send({posts: posts, count: count});
 })
 
 app.post("/login",(req,res)=> {
+    console.log("route hit", req.body);
     const {email, password} = req.body
     User.findOne({email: email, password: password}, (err,user) => {
         if(user)
         {
-            const tokens = jwt.sign({_id: user._id}, "iamhardikworkingasasoftwareengineer");
-            res.cookie("jwt", tokens);
+            /*const tokens = jwt.sign({_id: user._id}, "iamhardikworkingasasoftwareengineer");
+            res.cookie("jwt", tokens);*/
             res.send(user);
         }
     })
 })
 
 app.post("/register",(req,res)=> {
+    console.log("ugu");
     const {username, password, email, fname, lname} = req.body
     User.findOne({email:email}, (err, user) => {
         if(user)
@@ -103,13 +109,13 @@ app.post("/register",(req,res)=> {
                 fname,
                 lname
             })
-            const newUser = jwt.sign({_id: user._id}, "iamhardikworkingasasoftwareengineer");
+            /*const newUser = jwt.sign({_id: user._id}, "iamhardikworkingasasoftwareengineer");
             res.cookie("jwt", newUser, {
                 maxAge: 2 * 60 * 60 * 1000,
                 httpOnly: false,
                 secure: true
             });
-            //console.log(cookie);
+            console.log(cookie);*/
             user.save( err => {
                 if(err)
                 {
@@ -117,6 +123,7 @@ app.post("/register",(req,res)=> {
                 }
                 else
                 {
+                    console.log(user);
                     res.send({message: "Successfully Registered"})
                 }
             })
